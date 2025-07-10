@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NutriTrack | Food Logger</title>
+  <style>
+    /* Styles same as before (unchanged)... */
+    /* You can paste the entire style section from your previous working file */
+:root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --accent: #f72585;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --success: #4cc9f0;
+      --danger: #ef233c;
+      --warning: #f8961e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      background-color: #f5f7ff;
+      color: var(--dark);
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    @supports (font-variation-settings: normal) {
+      body { font-family: 'Inter var', sans-serif; }
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin: 20px 0 30px;
+      font-weight: 700;
+      font-size: 2.2rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 250px;
+      padding: 14px 18px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    button {
+      padding: 14px 24px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    #scanBtn {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    #scanBtn:hover {
+      background-color: var(--secondary);
+      transform: translateY(-1px);
+    }
+
+    #resetBtn {
+      background-color: var(--danger);
+      color: white;
+    }
+
+    #resetBtn:hover {
+      background-color: #d90429;
+      transform: translateY(-1px);
+    }
+
+    .dashboard {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .summary-card {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .summary-card h3 {
+      color: var(--gray);
+      font-size: 1rem;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .summary-card .value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .sections {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .section h2 {
+      color: var(--primary);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f1f3f9;
+      font-size: 1.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section h2 span {
+      color: var(--gray);
+      font-size: 1rem;
+    }
+
+    .food-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .food-item {
+      background: #f8f9fe;
+      margin: 12px 0;
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary);
+      transition: all 0.2s ease;
+    }
+
+    .food-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .food-item h3 {
+      color: var(--dark);
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .food-item h3 .code {
+      color: var(--gray);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .nutrient-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 6px 0;
+      font-size: 0.9rem;
+    }
+
+    .nutrient-name {
+      color: var(--gray);
+      font-weight: 500;
+    }
+
+    .nutrient-value {
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 0;
+      color: var(--gray);
+    }
+
+    .total-calories {
+      text-align: center;
+      margin-top: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+
+    .total-calories h2 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .total-calories .value {
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard {
+        flex-direction: column;
+      }
+
+      .sections {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <h1>NutriTrack</h1>
+
+  <div class="controls">
+    <input type="text" id="scanner" placeholder="Enter food code (B001, L002, D003...)" autofocus>
+    <button id="scanBtn">➕ Add Item</button>
+    <button id="resetBtn">🔄 Reset All</button>
+  </div>
+
+  <div class="dashboard">
+    <div class="summary-card">
+      <h3>Breakfast</h3>
+      <div class="value" id="breakfast-total">0</div>
+      <small>kcal</small>
+    </div>
+    <div class="summary-card">
+      <h3>Lunch</h3>
+      <div class="value" id="lunch-total">0</div>
+      <small>kcal</small>
+    </div>
+    <div class="summary-card">
+      <h3>Dinner</h3>
+      <div class="value" id="dinner-total">0</div>
+      <small>kcal</small>
+    </div>
+  </div>
+
+  <div class="sections">
+    <div class="section" id="breakfast-section">
+      <h2>Breakfast <span id="breakfast-count">0 items</span></h2>
+      <div class="food-list" id="breakfast-items">
+        <div class="empty-state">No breakfast items logged yet</div>
+      </div>
+    </div>
+    <div class="section" id="lunch-section">
+      <h2>Lunch <span id="lunch-count">0 items</span></h2>
+      <div class="food-list" id="lunch-items">
+        <div class="empty-state">No lunch items logged yet</div>
+      </div>
+    </div>
+    <div class="section" id="dinner-section">
+      <h2>Dinner <span id="dinner-count">0 items</span></h2>
+      <div class="food-list" id="dinner-items">
+        <div class="empty-state">No dinner items logged yet</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="total-calories">
+    <h2>Total Daily Calories</h2>
+    <div class="value" id="grand-total">0</div>
+    <small>kcal</small>
+  </div>
+
+  <script>
+    let database = {};
+    const totals = {
+      breakfast: 0,
+      lunch: 0,
+      dinner: 0,
+      items: {
+        breakfast: [],
+        lunch: [],
+        dinner: []
+      }
+    };
+
+    // Load JSON database
+    fetch('data.json')
+      .then(res => res.json())
+      .then(data => {
+        database = data;
+        console.log("Food database loaded.");
+      })
+      .catch(err => {
+        alert("Failed to load data.json");
+        console.error(err);
+      });
+
+    document.getElementById('scanBtn').addEventListener('click', handleAdd);
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+    document.getElementById('scanner').addEventListener('keypress', e => {
+      if (e.key === 'Enter') handleAdd();
+    });
+
+    function handleAdd() {
+      const input = document.getElementById('scanner');
+      const code = input.value.trim().toUpperCase();
+      if (!code || !database[code]) {
+        alert(`Item code "${code}" not found!`);
+        return;
+      }
+      addItem(code);
+      input.value = '';
+    }
+
+    function addItem(code) {
+      const item = database[code];
+      const category = item.category;
+      const container = document.getElementById(`${category}-items`);
+
+      if (container.querySelector('.empty-state')) {
+        container.innerHTML = '';
+      }
+
+      const div = document.createElement('div');
+      div.className = 'food-item';
+      div.innerHTML = `
+        <h3>${item["Item Name"]} <span class="code">${code}</span></h3>
+        <div class="nutrient-row"><span class="nutrient-name">Portion:</span><span class="nutrient-value">${item["Portion Size"]}</span></div>
+        <div class="nutrient-row"><span class="nutrient-name">Calories:</span><span class="nutrient-value">${item["Calories"]} kcal</span></div>
+        <div class="nutrient-row"><span class="nutrient-name">Protein:</span><span class="nutrient-value">${item["Protein (g)"]}g</span></div>
+        <div class="nutrient-row"><span class="nutrient-name">Carbs:</span><span class="nutrient-value">${item["Carbohydrates (g)"]}g</span></div>
+        <div class="nutrient-row"><span class="nutrient-name">Fats:</span><span class="nutrient-value">${item["Fats (g)"]}g</span></div>
+      `;
+
+      container.prepend(div);
+      totals[category] += item["Calories"];
+      totals.items[category].push(item);
+      updateUI();
+    }
+
+    function resetAll() {
+      ['breakfast', 'lunch', 'dinner'].forEach(cat => {
+        totals[cat] = 0;
+        totals.items[cat] = [];
+        document.getElementById(`${cat}-items`).innerHTML = `<div class="empty-state">No ${cat} items logged yet</div>`;
+      });
+      updateUI();
+    }
+
+    function updateUI() {
+      document.getElementById('breakfast-total').textContent = totals.breakfast;
+      document.getElementById('lunch-total').textContent = totals.lunch;
+      document.getElementById('dinner-total').textContent = totals.dinner;
+      document.getElementById('breakfast-count').textContent = `${totals.items.breakfast.length} items`;
+      document.getElementById('lunch-count').textContent = `${totals.items.lunch.length} items`;
+      document.getElementById('dinner-count').textContent = `${totals.items.dinner.length} items`;
+      const total = totals.breakfast + totals.lunch + totals.dinner;
+      document.getElementById('grand-total').textContent = total;
+    }
+  </script>
+</body>
+</html>
